@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0F4C5C">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icone-192.png">
+<link rel="apple-touch-icon" href="./icone-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Jeferson "Maquina" · Personal Trainer</title>
+<style>
+  :root{
+    --bg:#EDF0EE; --surface:#fff; --ink:#1A2420; --muted:#6B7A73;
+    --line:#DCE2DE; --primary:#0F4C5C; --primary-soft:#E3EDEF;
+    --danger:#9B2C23; --danger-soft:#FBE9E7; --ok:#2F7D53; --ok-soft:#E4F1E9;
+    --r:14px; --pad:16px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    font-size:15px; line-height:1.45; -webkit-tap-highlight-color:transparent;
+    padding-bottom:calc(76px + env(safe-area-inset-bottom));
+  }
+  .num{font-variant-numeric:tabular-nums}
+
+  header{
+    position:sticky; top:0; z-index:20;
+    background:var(--primary); color:#fff;
+    padding:calc(14px + env(safe-area-inset-top)) var(--pad) 14px;
+    display:flex; align-items:center; gap:12px;
+  }
+  header h1{margin:0; font-size:18px; font-weight:650; letter-spacing:-0.3px}
+  .marca p{margin:1px 0 0; font-size:12px; font-weight:550; color:rgba(255,255,255,.72); letter-spacing:.2px}
+  .ghost-btn{
+    background:rgba(255,255,255,.14); color:#fff; border:0; border-radius:10px;
+    padding:8px 12px; font-size:13.5px; font-weight:550; cursor:pointer; margin-left:auto;
+  }
+  .ghost-btn:active{background:rgba(255,255,255,.26)}
+  .warn{background:#FDF3E3; color:#6A4A12; border-bottom:1px solid #EBD9B4; padding:10px var(--pad); font-size:13.5px}
+  .lembrete{background:#FDF3E3; color:#6A4A12; border-bottom:1px solid #EBD9B4; padding:9px var(--pad); font-size:13.5px; display:flex; align-items:center; gap:10px}
+  .lembrete button{margin-left:auto; flex:none; background:#6A4A12; color:#fff; border:0; border-radius:9px; padding:7px 12px; font:inherit; font-size:13px; font-weight:600; cursor:pointer}
+
+  .mes{
+    display:flex; align-items:center; gap:6px; background:var(--surface);
+    border-bottom:1px solid var(--line); padding:8px var(--pad);
+  }
+  .mes span{flex:1; text-align:center; font-weight:600; letter-spacing:-0.2px}
+  .mes button{
+    background:none; border:0; font:inherit; font-size:22px; line-height:1;
+    color:var(--primary); padding:6px 14px; cursor:pointer; border-radius:10px;
+  }
+  .mes button:active{background:var(--primary-soft)}
+
+  .resumo{display:flex; gap:var(--pad); padding:var(--pad) var(--pad) 6px}
+  .resumo div{flex:1}
+  .resumo .valor{font-size:21px; font-weight:650; letter-spacing:-0.4px; display:block}
+  .resumo .rot{font-size:13px; color:var(--muted)}
+  .resumo .atras{color:var(--danger)}
+
+  .chips{display:flex; gap:7px; padding:8px var(--pad) 0; overflow-x:auto; -webkit-overflow-scrolling:touch}
+  .chip{
+    flex:none; background:var(--surface); border:1px solid var(--line); color:var(--muted);
+    border-radius:99px; padding:7px 13px; font:inherit; font-size:13.5px; font-weight:550; cursor:pointer;
+  }
+  .chip[aria-pressed="true"]{background:var(--primary); border-color:var(--primary); color:#fff}
+
+  .periodo{display:flex; gap:10px; padding:12px var(--pad) 0}
+  .periodo label{flex:1; margin:0; font-size:12.5px}
+  .periodo input{margin-top:3px; padding:9px 10px; font-size:15px}
+
+  main{padding:var(--pad)}
+  h2{font-size:13.5px; font-weight:600; color:var(--muted); margin:22px 0 8px}
+  h2:first-child{margin-top:4px}
+
+  .item{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+    padding:13px 14px; margin-bottom:8px; display:flex; align-items:center; gap:12px;
+    cursor:pointer; width:100%; text-align:left; font:inherit; color:inherit;
+  }
+  .item:active{background:#F7F9F7}
+  .item .corpo{flex:1; min-width:0}
+  .item .nome{font-weight:580; letter-spacing:-0.1px; display:block}
+  .item .sub{font-size:13px; color:var(--muted); margin-top:1px; display:block}
+  .item .fim{text-align:right; white-space:nowrap}
+  .item .preco{font-weight:600}
+  .item .venc{font-size:12.5px; color:var(--muted)}
+  .dot{width:10px; height:10px; border-radius:3px; flex:none}
+  .herdado{color:var(--muted); font-weight:500}
+  .inativo .nome{color:var(--muted); text-decoration:line-through}
+  .item.pago{background:#FAFCFA}
+  .item.pago .nome{color:var(--muted)}
+  .item.atrasado{border-color:#EBC6C1}
+  .item.cancelado{opacity:.55}
+  .pill{font-size:12px; font-weight:600; padding:1px 8px; border-radius:99px; display:inline-block}
+  .pill.pago{background:var(--ok-soft); color:var(--ok)}
+  .pill.atrasado{background:var(--danger-soft); color:var(--danger)}
+
+  .vazio{border:1px dashed var(--line); border-radius:var(--r); padding:26px 18px; text-align:center; color:var(--muted); background:rgba(255,255,255,.5)}
+  .vazio p{margin:0 0 14px}
+
+  .btn{background:var(--primary); color:#fff; border:0; border-radius:11px; padding:13px 18px; font:inherit; font-weight:600; cursor:pointer}
+  .btn:active{opacity:.85}
+  .btn.sec{background:var(--primary-soft); color:var(--primary)}
+  .btn.del{background:transparent; color:var(--danger); font-weight:550}
+  .btn.zap{background:var(--ok-soft); color:var(--ok)}
+  .fab{position:fixed; right:16px; bottom:calc(84px + env(safe-area-inset-bottom)); width:56px; height:56px; border-radius:18px; font-size:28px; line-height:1; box-shadow:0 6px 18px rgba(15,76,92,.35); z-index:25; padding:0}
+  .fab[hidden]{display:none}
+
+  nav{position:fixed; left:0; right:0; bottom:0; z-index:30; background:var(--surface); border-top:1px solid var(--line); display:flex; padding-bottom:env(safe-area-inset-bottom)}
+  nav button{flex:1; background:none; border:0; padding:12px 2px 14px; font:inherit; font-size:12.5px; color:var(--muted); cursor:pointer; font-weight:550; border-top:2px solid transparent; margin-top:-1px}
+  nav button[aria-current="page"]{color:var(--primary); border-top-color:var(--primary)}
+
+  .sheet-bg{position:fixed; inset:0; background:rgba(20,32,28,.45); z-index:40; display:flex; align-items:flex-end; justify-content:center}
+  .sheet{background:var(--bg); width:100%; max-width:520px; max-height:92vh; overflow:auto; border-radius:18px 18px 0 0; padding:6px var(--pad) calc(20px + env(safe-area-inset-bottom))}
+  @media(min-width:560px){ .sheet-bg{align-items:center} .sheet{border-radius:18px; max-height:86vh} }
+  .grabber{width:38px; height:4px; background:var(--line); border-radius:2px; margin:8px auto 14px}
+  .sheet h3{margin:0 0 4px; font-size:18px; letter-spacing:-0.2px}
+  .sheet .cab{color:var(--muted); font-size:13.5px; margin:0 0 16px}
+  label{display:block; margin-bottom:14px; font-size:13.5px; color:var(--muted); font-weight:550}
+  input,select{display:block; width:100%; margin-top:5px; padding:12px; border:1px solid var(--line); border-radius:11px; background:var(--surface); font:inherit; font-size:16px; color:var(--ink)}
+  input:focus,select:focus{outline:2px solid var(--primary); outline-offset:-1px; border-color:transparent}
+  .linha{display:flex; gap:10px}
+  .linha label{flex:1}
+  .switch{display:flex; align-items:center; gap:10px; margin-bottom:16px; font-weight:550}
+  .switch input{width:auto; margin:0}
+  .erro{color:var(--danger); font-size:13.5px; margin:-6px 0 12px}
+  .acoes{display:flex; gap:10px; margin-top:6px}
+  .acoes .btn{flex:1}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="marca">
+    <h1>Jeferson "Maquina"</h1>
+    <p>Personal trainer</p>
+  </div>
+  <button class="ghost-btn" id="btn-backup">Backup</button>
+</header>
+
+<div id="aviso"></div>
+<div id="app"></div>
+
+<button class="btn fab" id="fab" aria-label="Adicionar">+</button>
+
+<nav>
+  <button data-aba="mensalidades">Mensalidades</button>
+  <button data-aba="recebimentos">Recebidos</button>
+  <button data-aba="alunos">Alunos</button>
+  <button data-aba="academias">Academias</button>
+</nav>
+
+<input type="file" id="arquivo-import" accept="application/json" hidden>
+
+<script>
+/* ==========================================================
+   Dados — IndexedDB com queda para memória
+   ========================================================== */
+const STORES = ['academias','alunos','cobrancas'];
+const TODAS  = [...STORES, 'config'];          // config fica fora do backup
+let idb = null, persistente = true;
+const cache = {academias:[], alunos:[], cobrancas:[]};
+const cfg = {ultimoBackup:null};
+
+function abrirBanco(){
+  return new Promise((ok,err)=>{
+    if(!('indexedDB' in window)) return err(new Error('sem indexedDB'));
+    const req = indexedDB.open('caderneta', 3);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      TODAS.forEach(s => { if(!db.objectStoreNames.contains(s)) db.createObjectStore(s,{keyPath:'id'}); });
+    };
+    req.onsuccess = () => ok(req.result);
+    req.onerror   = () => err(req.error);
+    req.onblocked = () => err(new Error('bloqueado'));
+  });
+}
+function lerTudo(store){
+  return new Promise((ok,err)=>{
+    const t = idb.transaction(store,'readonly').objectStore(store).getAll();
+    t.onsuccess = () => ok(t.result); t.onerror = () => err(t.error);
+  });
+}
+async function salvar(store, obj){
+  const i = cache[store].findIndex(x => x.id === obj.id);
+  if(i >= 0) cache[store][i] = obj; else cache[store].push(obj);
+  if(!persistente) return;
+  return new Promise((ok,err)=>{
+    const t = idb.transaction(store,'readwrite').objectStore(store).put(obj);
+    t.onsuccess = () => ok(); t.onerror = () => err(t.error);
+  });
+}
+async function apagar(store, id){
+  cache[store] = cache[store].filter(x => x.id !== id);
+  if(!persistente) return;
+  return new Promise((ok,err)=>{
+    const t = idb.transaction(store,'readwrite').objectStore(store).delete(id);
+    t.onsuccess = () => ok(); t.onerror = () => err(t.error);
+  });
+}
+const novoId = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+
+/* ==========================================================
+   Utilidades
+   ========================================================== */
+const CORES = ['#0F4C5C','#8A5A2B','#3F5C2F','#6B3A5E','#1F4E8C','#96431F','#2F7D53','#5B3B8C'];
+const MESES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+const pad2 = n => String(n).padStart(2,'0');
+const dinheiro = c => (c/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+
+function hoje(){ const d = new Date(); return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
+const compHoje = () => hoje().slice(0,7);
+const diasNoMes = comp => { const [a,m] = comp.split('-').map(Number); return new Date(a, m, 0).getDate(); };
+function somaMes(comp, n){
+  const [a,m] = comp.split('-').map(Number);
+  const d = new Date(a, m-1+n, 1);
+  return `${d.getFullYear()}-${pad2(d.getMonth()+1)}`;
+}
+const rotuloMes = c => { const [a,m] = c.split('-').map(Number);
+  return MESES[m-1].charAt(0).toUpperCase() + MESES[m-1].slice(1) + ' ' + a; };
+const dataBR = iso => iso ? iso.slice(8,10)+'/'+iso.slice(5,7) : '';
+function paraCentavos(txt){
+  let s = String(txt||'').trim().replace(/[^\d,.]/g,'');
+  if(!s) return null;
+  if(/,\d{1,2}$/.test(s))       s = s.replace(/\./g,'').replace(',','.');
+  else if(/\.\d{1,2}$/.test(s)) s = s.replace(/,/g,'');
+  else                          s = s.replace(/[.,]/g,'');
+  const n = parseFloat(s);
+  return isNaN(n) ? null : Math.round(n*100);
+}
+const paraTexto = c => c == null ? '' : (c/100).toFixed(2).replace('.',',');
+const esc = s => String(s??'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+const academia = id => cache.academias.find(a => a.id === id);
+const aluno    = id => cache.alunos.find(a => a.id === id);
+const valorDe      = al => al.valor != null ? al.valor : (academia(al.academiaId)?.valorPadrao ?? null);
+const vencimentoDe = al => al.diaVencimento != null ? al.diaVencimento : (academia(al.academiaId)?.diaPadrao ?? null);
+const proprio = (al,campo) => al[campo] != null;
+
+/* ==========================================================
+   Regra de negócio: cobranças do mês
+   ========================================================== */
+const dataVencimento = (comp, dia) => `${comp}-${pad2(Math.min(dia, diasNoMes(comp)))}`;
+
+// Idempotente: só cria o que falta, nunca mexe no que já existe.
+async function gerarCobrancas(comp){
+  if(comp > somaMes(compHoje(), 1)) return 0;          // no máximo o mês que vem
+  let criadas = 0;
+  for(const al of cache.alunos){
+    if(!al.ativo) continue;
+    if(comp < (al.inicio||'').slice(0,7)) continue;    // antes de o aluno começar
+    if(cache.cobrancas.some(c => c.alunoId === al.id && c.competencia === comp)) continue;
+    const valor = valorDe(al), dia = vencimentoDe(al);
+    if(valor == null || dia == null) continue;        // sem valor definido, não cobra
+    await salvar('cobrancas', {
+      id: novoId(), alunoId: al.id, competencia: comp,
+      valorDevido: valor,
+      vencimento: dataVencimento(comp, dia),
+      status: 'aberto', dataPagamento: null, valorPago: null
+    });
+    criadas++;
+  }
+  return criadas;
+}
+const situacao = c => c.status === 'aberto' && c.vencimento < hoje() ? 'atrasado' : c.status;
+
+/* ==========================================================
+   Telas
+   ========================================================== */
+let aba = 'mensalidades', comp = compHoje(), filtro = 'todos', filtroAcademia = '';
+let de = `${compHoje()}-01`, ate = hoje();
+const app = document.getElementById('app');
+
+function render(){
+  document.querySelectorAll('nav button').forEach(b =>
+    b.dataset.aba === aba ? b.setAttribute('aria-current','page') : b.removeAttribute('aria-current'));
+  document.getElementById('fab').hidden = (aba === 'mensalidades' || aba === 'recebimentos');
+  if(aba === 'mensalidades')      telaMensalidades();
+  else if(aba === 'recebimentos') telaRecebimentos();
+  else if(aba === 'alunos')       telaAlunos();
+  else                            telaAcademias();
+}
+
+async function irParaMes(n){ comp = somaMes(comp, n); await gerarCobrancas(comp); render(); }
+
+function telaMensalidades(){
+  let lista = cache.cobrancas.filter(c => c.competencia === comp);
+  const validas  = lista.filter(c => c.status !== 'cancelado');
+  const recebido = validas.filter(c => c.status === 'pago').reduce((s,c) => s + (c.valorPago ?? c.valorDevido), 0);
+  const abertos  = validas.filter(c => c.status === 'aberto');
+  const emAberto = abertos.reduce((s,c) => s + c.valorDevido, 0);
+  const atrasado = abertos.filter(c => situacao(c) === 'atrasado').reduce((s,c) => s + c.valorDevido, 0);
+
+  if(filtro !== 'todos') lista = lista.filter(c => situacao(c) === filtro);
+  if(filtroAcademia)     lista = lista.filter(c => aluno(c.alunoId)?.academiaId === filtroAcademia);
+  const ordem = c => ({atrasado:0, aberto:1, pago:2, cancelado:3})[situacao(c)];
+  lista.sort((x,y) => ordem(x) - ordem(y) || x.vencimento.localeCompare(y.vencimento)
+      || (aluno(x.alunoId)?.nome||'').localeCompare(aluno(y.alunoId)?.nome||'','pt-BR'));
+
+  const chipsStatus = [['todos','Todas'],['aberto','Em aberto'],['atrasado','Vencidas'],['pago','Pagas']]
+    .map(([v,r]) => `<button class="chip" aria-pressed="${filtro===v}" onclick="filtro='${v}';render()">${r}</button>`).join('');
+  const chipsAcad = cache.academias.length > 1
+    ? `<button class="chip" aria-pressed="${!filtroAcademia}" onclick="filtroAcademia='';render()">Todas academias</button>` +
+      cache.academias.map(a => `<button class="chip" aria-pressed="${filtroAcademia===a.id}" onclick="filtroAcademia='${a.id}';render()">${esc(a.nome)}</button>`).join('')
+    : '';
+
+  let html = `
+    <div class="mes">
+      <button onclick="irParaMes(-1)" aria-label="Mês anterior">&lsaquo;</button>
+      <span>${rotuloMes(comp)}</span>
+      <button onclick="irParaMes(1)" aria-label="Próximo mês">&rsaquo;</button>
+    </div>
+    <div class="resumo">
+      <div><span class="valor num">${dinheiro(recebido)}</span><span class="rot">recebido</span></div>
+      <div><span class="valor num ${atrasado?'atras':''}">${dinheiro(emAberto)}</span>
+           <span class="rot">${atrasado ? dinheiro(atrasado) + ' já vencido' : 'em aberto'}</span></div>
+    </div>
+    <div class="chips">${chipsStatus}</div>
+    ${chipsAcad ? `<div class="chips">${chipsAcad}</div>` : ''}
+    <main>`;
+
+  if(!validas.length){
+    html += `<div class="vazio"><p>Nenhuma mensalidade em ${rotuloMes(comp).toLowerCase()}. As cobranças aparecem sozinhas para cada aluno ativo quando o mês chega.</p></div>`;
+  } else if(!lista.length){
+    html += `<div class="vazio"><p>Nada neste filtro.</p></div>`;
+  } else {
+    for(const c of lista){
+      const al = aluno(c.alunoId); if(!al) continue;
+      const ac = academia(al.academiaId);
+      const st = situacao(c);
+      const sub = st === 'pago'      ? `pago em ${dataBR(c.dataPagamento)}`
+                : st === 'cancelado' ? 'cancelada'
+                :                      `vence ${dataBR(c.vencimento)}`;
+      const pill = st === 'pago'     ? ' · <span class="pill pago">pago</span>'
+                 : st === 'atrasado' ? ' · <span class="pill atrasado">vencida</span>' : '';
+      html += `
+        <button class="item ${st}" onclick="formBaixa('${c.id}')">
+          <span class="dot" style="background:${ac?.cor||'#999'}"></span>
+          <span class="corpo">
+            <span class="nome">${esc(al.nome)}</span>
+            <span class="sub">${sub}${pill}</span>
+          </span>
+          <span class="fim"><span class="preco num">${dinheiro(st==='pago' ? (c.valorPago ?? c.valorDevido) : c.valorDevido)}</span></span>
+        </button>`;
+    }
+  }
+  app.innerHTML = html + '</main>';
+}
+
+/* --- Recebidos: olha a data em que o dinheiro entrou, não a competência --- */
+function somaDias(iso, n){
+  const [a,m,d] = iso.split('-').map(Number);
+  const x = new Date(a, m-1, d+n);
+  return `${x.getFullYear()}-${pad2(x.getMonth()+1)}-${pad2(x.getDate())}`;
+}
+const SEMANA = ['dom','seg','ter','qua','qui','sex','sáb'];
+function diaLongo(iso){
+  const [a,m,d] = iso.split('-').map(Number);
+  return `${pad2(d)}/${pad2(m)} · ${SEMANA[new Date(a, m-1, d).getDay()]}`;
+}
+function periodo(qual){
+  if(qual === 'mes'){ de = `${compHoje()}-01`; ate = hoje(); }
+  if(qual === 'anterior'){ const c = somaMes(compHoje(), -1); de = `${c}-01`; ate = `${c}-${pad2(diasNoMes(c))}`; }
+  if(qual === '30'){ de = somaDias(hoje(), -29); ate = hoje(); }
+  render();
+}
+function mudarData(campo, valor){ if(!valor) return; if(campo === 'de') de = valor; else ate = valor; render(); }
+
+function telaRecebimentos(){
+  const quanto = c => c.valorPago ?? c.valorDevido;
+  let pagos = cache.cobrancas.filter(c => c.status === 'pago' && c.dataPagamento >= de && c.dataPagamento <= ate);
+  if(filtroAcademia) pagos = pagos.filter(c => aluno(c.alunoId)?.academiaId === filtroAcademia);
+  pagos.sort((x,y) => y.dataPagamento.localeCompare(x.dataPagamento)
+      || (aluno(x.alunoId)?.nome||'').localeCompare(aluno(y.alunoId)?.nome||'','pt-BR'));
+
+  const total = pagos.reduce((s,c) => s + quanto(c), 0);
+  const porDia = {};
+  pagos.forEach(c => porDia[c.dataPagamento] = (porDia[c.dataPagamento] || 0) + quanto(c));
+
+  const chipsAcad = cache.academias.length > 1
+    ? `<button class="chip" aria-pressed="${!filtroAcademia}" onclick="filtroAcademia='';render()">Todas academias</button>` +
+      cache.academias.map(a => `<button class="chip" aria-pressed="${filtroAcademia===a.id}" onclick="filtroAcademia='${a.id}';render()">${esc(a.nome)}</button>`).join('')
+    : '';
+
+  let html = `
+    <div class="periodo">
+      <label>De<input type="date" value="${de}" onchange="mudarData('de',this.value)"></label>
+      <label>Até<input type="date" value="${ate}" onchange="mudarData('ate',this.value)"></label>
+    </div>
+    <div class="chips">
+      <button class="chip" onclick="periodo('mes')">Este mês</button>
+      <button class="chip" onclick="periodo('anterior')">Mês passado</button>
+      <button class="chip" onclick="periodo('30')">Últimos 30 dias</button>
+    </div>
+    <div class="resumo">
+      <div><span class="valor num">${dinheiro(total)}</span><span class="rot">entrou no período</span></div>
+      <div><span class="valor num">${pagos.length}</span><span class="rot">${pagos.length===1?'pagamento':'pagamentos'}</span></div>
+    </div>
+    ${chipsAcad ? `<div class="chips">${chipsAcad}</div>` : ''}
+    <main>`;
+
+  if(de > ate){
+    html += `<div class="vazio"><p>A data inicial está depois da final.</p></div>`;
+  } else if(!pagos.length){
+    html += `<div class="vazio"><p>Nenhum pagamento recebido neste período.</p></div>`;
+  } else {
+    let dia = null;
+    for(const c of pagos){
+      const al = aluno(c.alunoId); if(!al) continue;
+      const ac = academia(al.academiaId);
+      if(c.dataPagamento !== dia){
+        dia = c.dataPagamento;
+        html += `<h2>${diaLongo(dia)} · ${dinheiro(porDia[dia])}</h2>`;
+      }
+      html += `
+        <button class="item" onclick="formBaixa('${c.id}')">
+          <span class="dot" style="background:${ac?.cor||'#999'}"></span>
+          <span class="corpo">
+            <span class="nome">${esc(al.nome)}</span>
+            <span class="sub">mensalidade de ${MESES[+c.competencia.slice(5)-1]}${ac?' · '+esc(ac.nome):''}</span>
+          </span>
+          <span class="fim"><span class="preco num">${dinheiro(quanto(c))}</span></span>
+        </button>`;
+    }
+  }
+  app.innerHTML = html + '</main>';
+}
+
+function telaAlunos(){
+  const ativos = cache.alunos.filter(a => a.ativo);
+  const previsto = ativos.reduce((s,a) => s + (valorDe(a) ?? 0), 0);
+  let html = `
+    <div class="resumo">
+      <div><span class="valor num">${ativos.length}</span><span class="rot">alunos ativos</span></div>
+      <div><span class="valor num">${dinheiro(previsto)}</span><span class="rot">previsto por mês</span></div>
+    </div><main>`;
+
+  if(!cache.academias.length){
+    html += `<div class="vazio"><p>Cadastre uma academia primeiro. Ela guarda o valor e o dia de vencimento padrão dos alunos.</p>
+             <button class="btn sec" onclick="aba='academias';render()">Ir para academias</button></div>`;
+  } else if(!cache.alunos.length){
+    html += `<div class="vazio"><p>Nenhum aluno ainda.</p><button class="btn sec" onclick="formAluno()">Cadastrar aluno</button></div>`;
+  } else {
+    for(const ac of cache.academias){
+      const lista = cache.alunos.filter(a => a.academiaId === ac.id).sort((a,b) => a.nome.localeCompare(b.nome,'pt-BR'));
+      if(!lista.length) continue;
+      html += `<h2>${esc(ac.nome)} · ${lista.filter(a=>a.ativo).length} ativos</h2>`;
+      for(const al of lista){
+        html += `
+          <button class="item ${al.ativo?'':'inativo'}" onclick="formAluno('${al.id}')">
+            <span class="dot" style="background:${ac.cor}"></span>
+            <span class="corpo">
+              <span class="nome">${esc(al.nome)}</span>
+              <span class="sub">${al.telefone ? esc(al.telefone) : (al.ativo ? 'sem telefone' : 'inativo')}</span>
+            </span>
+            <span class="fim">
+              <span class="preco num ${proprio(al,'valor')?'':'herdado'}">${valorDe(al)==null?'sem valor':dinheiro(valorDe(al))}</span><br>
+              <span class="venc num">${vencimentoDe(al)==null?'sem vencimento':'vence dia '+vencimentoDe(al)}</span>
+            </span>
+          </button>`;
+      }
+    }
+  }
+  app.innerHTML = html + '</main>';
+}
+
+function telaAcademias(){
+  let html = '<main>';
+  if(!cache.academias.length){
+    html += `<div class="vazio"><p>Cadastre as academias onde você atende. O valor e o dia de vencimento definidos aqui valem para todos os alunos do local — e podem ser trocados aluno a aluno.</p>
+             <button class="btn sec" onclick="formAcademia()">Cadastrar academia</button></div>`;
+  } else {
+    for(const ac of cache.academias){
+      const qtd = cache.alunos.filter(a => a.academiaId === ac.id && a.ativo).length;
+      html += `
+        <button class="item" onclick="formAcademia('${ac.id}')">
+          <span class="dot" style="background:${ac.cor}"></span>
+          <span class="corpo">
+            <span class="nome">${esc(ac.nome)}</span>
+            <span class="sub">${qtd} ${qtd===1?'aluno ativo':'alunos ativos'}</span>
+          </span>
+          <span class="fim">
+            <span class="preco num ${ac.valorPadrao==null?'herdado':''}">${ac.valorPadrao==null?'valor por aluno':dinheiro(ac.valorPadrao)}</span><br>
+            <span class="venc num">${ac.diaPadrao==null?'vencimento por aluno':'vence dia '+ac.diaPadrao}</span>
+          </span>
+        </button>`;
+    }
+  }
+  app.innerHTML = html + '</main>';
+}
+
+/* ==========================================================
+   Formulários
+   ========================================================== */
+function abrirSheet(html){
+  const bg = document.createElement('div');
+  bg.className = 'sheet-bg';
+  bg.innerHTML = `<div class="sheet"><div class="grabber"></div>${html}</div>`;
+  bg.addEventListener('click', e => { if(e.target === bg) bg.remove(); });
+  document.body.appendChild(bg);
+  return bg;
+}
+const fecharSheet = () => document.querySelector('.sheet-bg')?.remove();
+const erro = msg => { const e = document.getElementById('erro'); e.textContent = msg; e.scrollIntoView({block:'center'}); };
+
+function formBaixa(id){
+  const c  = cache.cobrancas.find(x => x.id === id);
+  const al = aluno(c.alunoId);
+  const st = situacao(c);
+  const pago = c.status === 'pago';
+
+  const corpo = pago ? `
+      <label>Valor recebido<input id="f-valor" inputmode="decimal" value="${paraTexto(c.valorPago ?? c.valorDevido)}"></label>
+      <label>Data do pagamento<input id="f-data" type="date" value="${c.dataPagamento||hoje()}"></label>
+      <div class="erro" id="erro"></div>
+      <div class="acoes">
+        <button class="btn sec" onclick="fecharSheet()">Fechar</button>
+        <button class="btn" id="f-ok">Salvar alteração</button>
+      </div>
+      <div class="acoes"><button class="btn del" id="f-desfazer">Desfazer baixa</button></div>`
+    : `
+      <label>Valor da mensalidade<input id="f-valor" inputmode="decimal" value="${paraTexto(c.valorDevido)}"></label>
+      <label>Data do pagamento<input id="f-data" type="date" value="${hoje()}"></label>
+      <div class="erro" id="erro"></div>
+      <div class="acoes"><button class="btn" id="f-ok">Dar baixa como pago</button></div>
+      ${al.telefone ? '<div class="acoes"><button class="btn zap" id="f-zap">Cobrar no WhatsApp</button></div>' : ''}
+      <div class="acoes">
+        <button class="btn sec" onclick="fecharSheet()">Fechar</button>
+        <button class="btn del" id="f-cancelar">${c.status==='cancelado'?'Reabrir mês':'Cancelar mês'}</button>
+      </div>`;
+
+  const sheet = abrirSheet(`
+    <h3>${esc(al.nome)}</h3>
+    <p class="cab">${rotuloMes(c.competencia)} · vence ${dataBR(c.vencimento)}${st==='atrasado'?' · vencida':''}</p>
+    ${corpo}`);
+
+  sheet.querySelector('#f-ok').onclick = async () => {
+    const v = paraCentavos(document.getElementById('f-valor').value);
+    const d = document.getElementById('f-data').value;
+    if(v == null) return erro('Informe o valor.');
+    if(!d) return erro('Informe a data do pagamento.');
+    if(!pago) c.valorDevido = v;
+    c.valorPago = v; c.dataPagamento = d; c.status = 'pago';
+    await salvar('cobrancas', c); fecharSheet(); render();
+  };
+  if(pago){
+    sheet.querySelector('#f-desfazer').onclick = async () => {
+      c.status = 'aberto'; c.dataPagamento = null; c.valorPago = null;
+      await salvar('cobrancas', c); fecharSheet(); render();
+    };
+  } else {
+    sheet.querySelector('#f-cancelar').onclick = async () => {
+      c.status = c.status === 'cancelado' ? 'aberto' : 'cancelado';
+      await salvar('cobrancas', c); fecharSheet(); render();
+    };
+    const zap = sheet.querySelector('#f-zap');
+    if(zap) zap.onclick = () => {
+      let tel = al.telefone.replace(/\D/g,'').replace(/^0+/,'');
+      if(tel.length <= 11) tel = '55' + tel;                 // sem código do país
+      const msg = `Oi, ${al.nome.split(' ')[0]}! Passando pra lembrar da mensalidade de ${MESES[+c.competencia.slice(5)-1]}: ${dinheiro(c.valorDevido)}, vencimento em ${dataBR(c.vencimento)}.`;
+      const a = document.createElement('a');
+      a.href = `https://wa.me/${tel}?text=${encodeURIComponent(msg)}`;
+      a.target = '_blank'; a.rel = 'noopener';
+      document.body.appendChild(a); a.click(); a.remove();
+      navigator.clipboard?.writeText(msg).catch(()=>{});     // fica na área de transferência
+    };
+  }
+}
+
+function formAcademia(id){
+  const ac = id ? academia(id) : null;
+  const sheet = abrirSheet(`
+    <h3>${ac ? 'Editar academia' : 'Nova academia'}</h3>
+    <p class="cab">${ac ? 'Mudar o valor aqui vale só para as próximas cobranças. ' : ''}Deixe valor e vencimento em branco quando cada aluno do local tiver o seu — é o caso do atendimento particular.</p>
+    <label>Nome<input id="f-nome" value="${ac?esc(ac.nome):''}" placeholder="Ex.: Smart Fit Tatuapé" autocomplete="off"></label>
+    <div class="linha">
+      <label>Valor padrão<input id="f-valor" inputmode="decimal" value="${ac?paraTexto(ac.valorPadrao):''}" placeholder="por aluno"></label>
+      <label>Dia do vencimento<input id="f-dia" inputmode="numeric" value="${ac&&ac.diaPadrao!=null?ac.diaPadrao:''}" placeholder="por aluno"></label>
+    </div>
+    <label>Contato do local<input id="f-contato" value="${ac?esc(ac.contato||''):''}" placeholder="opcional" autocomplete="off"></label>
+    <div class="erro" id="erro"></div>
+    <div class="acoes">
+      <button class="btn sec" onclick="fecharSheet()">Cancelar</button>
+      <button class="btn" id="f-salvar">Salvar</button>
+    </div>
+    ${ac ? '<div class="acoes"><button class="btn del" id="f-apagar">Excluir academia</button></div>' : ''}`);
+
+  sheet.querySelector('#f-salvar').onclick = async () => {
+    const nome  = document.getElementById('f-nome').value.trim();
+    const vTxt  = document.getElementById('f-valor').value.trim();
+    const dTxt  = document.getElementById('f-dia').value.trim();
+    const valor = vTxt ? paraCentavos(vTxt) : null;
+    const dia   = dTxt ? parseInt(dTxt, 10) : null;
+    if(!nome) return erro('Dê um nome à academia.');
+    if(vTxt && valor == null) return erro('Valor inválido. Use algo como 150,00.');
+    if(dTxt && !(dia >= 1 && dia <= 31)) return erro('O dia do vencimento precisa estar entre 1 e 31.');
+    await salvar('academias', {
+      id: ac?.id ?? novoId(), nome, valorPadrao: valor, diaPadrao: dia,
+      contato: document.getElementById('f-contato').value.trim(),
+      cor: ac?.cor ?? CORES[cache.academias.length % CORES.length]
+    });
+    fecharSheet(); render();
+  };
+  if(ac) sheet.querySelector('#f-apagar').onclick = async () => {
+    const n = cache.alunos.filter(a => a.academiaId === ac.id).length;
+    if(n) return erro(`Esta academia tem ${n} ${n===1?'aluno vinculado':'alunos vinculados'}. Mova ou exclua ${n===1?'ele':'eles'} antes.`);
+    if(!confirm(`Excluir ${ac.nome}?`)) return;
+    await apagar('academias', ac.id); fecharSheet(); render();
+  };
+}
+
+function formAluno(id){
+  const al = id ? aluno(id) : null;
+  if(!cache.academias.length) return;
+  const opcoes = cache.academias.map(a => `<option value="${a.id}" ${al&&al.academiaId===a.id?'selected':''}>${esc(a.nome)}</option>`).join('');
+
+  const sheet = abrirSheet(`
+    <h3>${al ? 'Editar aluno' : 'Novo aluno'}</h3>
+    <label>Nome<input id="f-nome" value="${al?esc(al.nome):''}" placeholder="Nome do aluno" autocomplete="off"></label>
+    <label>Academia<select id="f-academia">${opcoes}</select></label>
+    <label>WhatsApp<input id="f-tel" inputmode="tel" value="${al?esc(al.telefone||''):''}" placeholder="(11) 90000-0000"></label>
+    <div class="linha">
+      <label>Valor<input id="f-valor" inputmode="decimal" value="${al&&al.valor!=null?paraTexto(al.valor):''}"></label>
+      <label>Dia do vencimento<input id="f-dia" inputmode="numeric" value="${al&&al.diaVencimento!=null?al.diaVencimento:''}"></label>
+    </div>
+    <div class="erro" id="dica" style="color:var(--muted);margin-top:-8px"></div>
+    <label>Início<input id="f-inicio" type="date" value="${al?al.inicio:hoje()}"></label>
+    <div class="switch"><input type="checkbox" id="f-ativo" ${!al||al.ativo?'checked':''}><label for="f-ativo" style="margin:0">Aluno ativo</label></div>
+    <div class="erro" id="erro"></div>
+    <div class="acoes">
+      <button class="btn sec" onclick="fecharSheet()">Cancelar</button>
+      <button class="btn" id="f-salvar">Salvar</button>
+    </div>
+    ${al ? '<div class="acoes"><button class="btn del" id="f-apagar">Excluir aluno</button></div>' : ''}`);
+
+  const sel = sheet.querySelector('#f-academia');
+  const atualizarDica = () => {
+    const ac = academia(sel.value);
+    sheet.querySelector('#dica').textContent = (ac.valorPadrao == null && ac.diaPadrao == null)
+      ? `${ac.nome} não tem padrão: preencha o valor e o vencimento deste aluno.`
+      : `Em branco, segue o padrão de ${ac.nome}: ${ac.valorPadrao!=null?dinheiro(ac.valorPadrao):'valor por aluno'}, ${ac.diaPadrao!=null?'dia '+ac.diaPadrao:'vencimento por aluno'}.`;
+    sheet.querySelector('#f-valor').placeholder = ac.valorPadrao != null ? paraTexto(ac.valorPadrao) : 'obrigatório';
+    sheet.querySelector('#f-dia').placeholder   = ac.diaPadrao   != null ? ac.diaPadrao : 'obrigatório';
+  };
+  sel.onchange = atualizarDica; atualizarDica();
+
+  sheet.querySelector('#f-salvar').onclick = async () => {
+    const nome = document.getElementById('f-nome').value.trim();
+    const vTxt = document.getElementById('f-valor').value.trim();
+    const dTxt = document.getElementById('f-dia').value.trim();
+    const valor = vTxt ? paraCentavos(vTxt) : null;
+    const dia   = dTxt ? parseInt(dTxt,10) : null;
+    const ac = academia(sel.value);
+    if(!nome) return erro('Dê um nome ao aluno.');
+    if(vTxt && valor == null) return erro('Valor inválido. Use algo como 150,00.');
+    if(dTxt && !(dia >= 1 && dia <= 31)) return erro('O dia do vencimento precisa estar entre 1 e 31.');
+    if(valor == null && ac.valorPadrao == null) return erro(`${ac.nome} não tem valor padrão. Informe o valor deste aluno.`);
+    if(dia == null && ac.diaPadrao == null) return erro(`${ac.nome} não tem vencimento padrão. Informe o dia deste aluno.`);
+    await salvar('alunos', {
+      id: al?.id ?? novoId(), nome, academiaId: sel.value,
+      telefone: document.getElementById('f-tel').value.trim(),
+      valor, diaVencimento: dia,
+      inicio: document.getElementById('f-inicio').value || hoje(),
+      ativo: document.getElementById('f-ativo').checked
+    });
+    await gerarCobrancas(comp);
+    fecharSheet(); render();
+  };
+  if(al) sheet.querySelector('#f-apagar').onclick = async () => {
+    const n = cache.cobrancas.filter(c => c.alunoId === al.id).length;
+    if(!confirm(`Excluir ${al.nome}?${n?` As ${n} cobranças dele também somem.`:''}`)) return;
+    for(const c of cache.cobrancas.filter(c => c.alunoId === al.id)) await apagar('cobrancas', c.id);
+    await apagar('alunos', al.id); fecharSheet(); render();
+  };
+}
+
+/* ==========================================================
+   Backup — compartilhar arquivo e lembrar de fazer
+   ========================================================== */
+const diasEntre = (a,b) => Math.round((new Date(b) - new Date(a)) / 86400000);
+const DIAS_LEMBRETE = 15;
+
+async function marcarBackup(){
+  cfg.ultimoBackup = hoje();
+  if(persistente){
+    try{ idb.transaction('config','readwrite').objectStore('config').put({id:'ultimoBackup', valor:hoje()}); }catch(e){}
+  }
+  atualizarAviso();
+}
+
+async function exportar(){
+  const dados = JSON.stringify({versao:2, exportadoEm:new Date().toISOString(), ...cache}, null, 1);
+  const nome  = `mensalidades-${hoje()}.json`;
+
+  // 1ª opção: compartilhamento do Android — cai direto no Drive, e-mail ou WhatsApp
+  try{
+    const arquivo = new File([dados], nome, {type:'application/json'});
+    if(navigator.canShare && navigator.canShare({files:[arquivo]})){
+      await navigator.share({files:[arquivo], title:'Cópia dos alunos e mensalidades'});
+      await marcarBackup(); fecharSheet(); return;
+    }
+  }catch(e){
+    if(e && e.name === 'AbortError') return;          // cancelou: não conta como salvo
+  }
+
+  // 2ª opção: baixar o arquivo
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([dados],{type:'application/json'}));
+  a.download = nome;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(a.href);
+  await marcarBackup(); fecharSheet();
+}
+
+function atualizarAviso(){
+  const alvo = document.getElementById('aviso');
+  if(!persistente){
+    alvo.innerHTML = '<div class="warn">Este navegador não está guardando dados. Abra o app pelo endereço https para que os cadastros fiquem salvos.</div>';
+    return;
+  }
+  if(!cache.alunos.length){ alvo.innerHTML = ''; return; }
+  const dias = cfg.ultimoBackup ? diasEntre(cfg.ultimoBackup, hoje()) : null;
+  if(dias !== null && dias < DIAS_LEMBRETE){ alvo.innerHTML = ''; return; }
+  const texto = dias === null
+    ? 'Você ainda não guardou uma cópia dos seus dados.'
+    : `Faz ${dias} dias que você não guarda uma cópia.`;
+  alvo.innerHTML = `<div class="lembrete"><span>${texto}</span><button onclick="exportar()">Salvar cópia</button></div>`;
+}
+
+function menuBackup(){
+  const quando = cfg.ultimoBackup ? `Última cópia em ${dataBR(cfg.ultimoBackup)}.` : 'Você ainda não guardou nenhuma cópia.';
+  const sheet = abrirSheet(`
+    <h3>Cópia de segurança</h3>
+    <p class="cab">${quando} Os dados ficam só neste aparelho — salve no Drive ou mande para você mesmo no WhatsApp de vez em quando.</p>
+    <div class="acoes"><button class="btn" onclick="exportar()">Salvar cópia</button></div>
+    <div class="acoes"><button class="btn sec" id="b-imp">Restaurar de um arquivo</button></div>
+    <div class="acoes"><button class="btn del" onclick="fecharSheet()">Fechar</button></div>`);
+  sheet.querySelector('#b-imp').onclick = () => document.getElementById('arquivo-import').click();
+}
+
+document.getElementById('arquivo-import').onchange = async e => {
+  const arq = e.target.files[0]; if(!arq) return;
+  try{
+    const d = JSON.parse(await arq.text());
+    if(!Array.isArray(d.academias) || !Array.isArray(d.alunos)) throw 0;
+    if(!confirm('Isso substitui tudo que está no aparelho. Continuar?')) return;
+    for(const s of STORES){
+      for(const x of [...cache[s]]) await apagar(s, x.id);
+      for(const x of (d[s] || [])) await salvar(s, x);
+    }
+    fecharSheet(); atualizarAviso(); render();
+  }catch{ alert('Arquivo inválido. Use uma cópia salva pelo próprio app.'); }
+  e.target.value = '';
+};
+
+/* ==========================================================
+   Partida
+   ========================================================== */
+document.getElementById('btn-backup').onclick = menuBackup;
+document.getElementById('fab').onclick = () => aba === 'alunos'
+  ? (cache.academias.length ? formAluno() : (aba='academias', render(), formAcademia()))
+  : formAcademia();
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => { aba = b.dataset.aba; render(); });
+
+(async function(){
+  try{
+    idb = await abrirBanco();
+    for(const s of STORES) cache[s] = await lerTudo(s);
+    for(const c of await lerTudo('config')) cfg[c.id] = c.valor;
+  }catch(e){
+    persistente = false;
+  }
+  await gerarCobrancas(comp);
+  atualizarAviso();
+  render();
+})();
+
+/* funciona offline depois da primeira abertura (só em https) */
+if('serviceWorker' in navigator && location.protocol === 'https:'){
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+}
+</script>
+</body>
+</html>
