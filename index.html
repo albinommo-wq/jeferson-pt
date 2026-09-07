@@ -123,6 +123,7 @@
   .sheet .cab{color:var(--muted); font-size:13.5px; margin:0 0 16px}
   label{display:block; margin-bottom:14px; font-size:13.5px; color:var(--muted); font-weight:550}
   input,select{display:block; width:100%; margin-top:5px; padding:12px; border:1px solid var(--line); border-radius:11px; background:var(--surface); font:inherit; font-size:16px; color:var(--ink)}
+  [hidden]{display:none !important}
   input:focus,select:focus{outline:2px solid var(--primary); outline-offset:-1px; border-color:transparent}
   .linha{display:flex; gap:10px}
   .linha label{flex:1}
@@ -137,8 +138,8 @@
 
 <header>
   <div class="marca">
-    <h1>Jeferson "Maquina"</h1>
-    <p>Personal trainer</p>
+    <h1 id="marca-nome"></h1>
+    <p id="marca-sub"></p>
   </div>
   <button class="ghost-btn" id="btn-backup">Backup</button>
 </header>
@@ -159,6 +160,17 @@
 
 <script>
 /* ==========================================================
+   CONFIGURAÇÃO — é só isto que muda ao clonar para outra pessoa
+   ========================================================== */
+const NOME    = 'Jeferson "Maquina"';   // aparece no topo do app
+const SUB     = 'Personal trainer';     // linha de apoio
+const BANCO   = 'caderneta';            // OBRIGATÓRIO ser único por pessoa
+
+document.title = `${NOME} · ${SUB}`;
+document.getElementById('marca-nome').textContent = NOME;
+document.getElementById('marca-sub').textContent  = SUB;
+
+/* ==========================================================
    Dados — IndexedDB com queda para memória
    ========================================================== */
 const STORES = ['academias','alunos','cobrancas'];
@@ -170,7 +182,7 @@ const cfg = {ultimoBackup:null};
 function abrirBanco(){
   return new Promise((ok,err)=>{
     if(!('indexedDB' in window)) return err(new Error('sem indexedDB'));
-    const req = indexedDB.open('caderneta', 3);
+    const req = indexedDB.open(BANCO, 3);
     req.onupgradeneeded = e => {
       const db = e.target.result;
       TODAS.forEach(s => { if(!db.objectStoreNames.contains(s)) db.createObjectStore(s,{keyPath:'id'}); });
