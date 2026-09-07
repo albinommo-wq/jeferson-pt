@@ -155,7 +155,7 @@
   <button data-aba="academias">Academias</button>
 </nav>
 
-<input type="file" id="arquivo-import" accept="application/json" hidden>
+<input type="file" id="arquivo-import" accept=".txt,.json,text/plain,application/json" hidden>
 
 <script>
 /* ==========================================================
@@ -695,11 +695,12 @@ async function marcarBackup(){
 
 async function exportar(){
   const dados = JSON.stringify({versao:2, exportadoEm:new Date().toISOString(), ...cache}, null, 1);
-  const nome  = `mensalidades-${hoje()}.json`;
+  // .txt de propósito: o compartilhamento do Android recusa .json
+  const nome  = `mensalidades-${hoje()}.txt`;
 
   // 1ª opção: compartilhamento do Android — cai direto no Drive, e-mail ou WhatsApp
   try{
-    const arquivo = new File([dados], nome, {type:'application/json'});
+    const arquivo = new File([dados], nome, {type:'text/plain'});
     if(navigator.canShare && navigator.canShare({files:[arquivo]})){
       await navigator.share({files:[arquivo], title:'Cópia dos alunos e mensalidades'});
       await marcarBackup(); fecharSheet(); return;
@@ -710,7 +711,7 @@ async function exportar(){
 
   // 2ª opção: baixar o arquivo
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([dados],{type:'application/json'}));
+  a.href = URL.createObjectURL(new Blob([dados],{type:'text/plain'}));
   a.download = nome;
   document.body.appendChild(a); a.click(); a.remove();
   URL.revokeObjectURL(a.href);
