@@ -3,7 +3,7 @@
    versão nova em paralelo, sempre direto do servidor — sem passar pelo
    cache do navegador, que na hospedagem segura o arquivo por minutos.
    Trocar o número da versão abaixo apaga a cópia antiga do aparelho. */
-const CACHE = 'jeferson-pt-v2';
+const CACHE = 'jeferson-pt-v3';
 const ARQUIVOS = ['./', './index.html', './manifest.json', './icone-192.png', './icone-512.png'];
 
 const semCache = url => new Request(url, {cache: 'reload'});

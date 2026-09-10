@@ -695,7 +695,12 @@ function formAluno(id){
    Backup — compartilhar arquivo e lembrar de fazer
    ========================================================== */
 const diasEntre = (a,b) => Math.round((new Date(b) - new Date(a)) / 86400000);
-const DIAS_LEMBRETE = 15;
+const DIAS_LEMBRETE = 7;
+
+/* pede ao navegador para não descartar os dados deste app */
+if(navigator.storage && navigator.storage.persist){
+  navigator.storage.persisted().then(ok => { if(!ok) navigator.storage.persist(); }).catch(()=>{});
+}
 
 async function marcarBackup(){
   cfg.ultimoBackup = hoje();
